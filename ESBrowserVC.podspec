@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'ESBrowserVC'
-  s.version          = '0.1.0'
+  s.version          = '0.3.0'
   s.summary          = 'iOS - WkWebViewHelper'
   s.swift_version    = '5.0'
 # This description is used to generate tags and improve search results.
@@ -39,4 +39,7 @@ TODO: Add long description of the pod here.
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
   # s.dependency 'AFNetworking', '~> 2.3'
+  s.dependency 'RxSwift'
+  s.dependency 'RxCocoa'
+  s.dependency 'SJFullscreenPopGesture'
 end

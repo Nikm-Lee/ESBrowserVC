@@ -85,14 +85,14 @@ public class JSWebBrowserController: UIViewController, JSWebBrowserNavigation, L
     
     
     //MARK: UI
-    private let container: UIView = {
+    public let container: UIView = {
         let container = UIView()
         container.backgroundColor = .white
         
         return container
     }()
     
-    private lazy var webView: WKWebView = {
+    public lazy var webView: WKWebView = {
         let webView = WKWebView(frame: .zero, configuration: browserManager.configuration)
         
         return webView
@@ -158,7 +158,9 @@ public class JSWebBrowserController: UIViewController, JSWebBrowserNavigation, L
         }
     }
     
-    
+    public var scrollView: UIScrollView {
+        return self.webView.scrollView
+    }
     
     public var navigationBarPrefersLargeTitles: Bool = false {
         didSet {
@@ -183,6 +185,8 @@ public class JSWebBrowserController: UIViewController, JSWebBrowserNavigation, L
 
         return close
     }()
+    
+    public var closeButtonAction: (()->Void)?
     
     public var closeButtonTitle: String? = nil {
         didSet{
@@ -211,7 +215,7 @@ public class JSWebBrowserController: UIViewController, JSWebBrowserNavigation, L
     
     public var closeButtonEnable: Bool = false {
         didSet{
-            guard transitionType == .modal || transitionType == .fixedModal else {return}
+//            guard transitionType == .modal || transitionType == .fixedModal else {return}
             
             navigationBar?.isHidden = !closeButtonEnable
             _navigationItem?.leftBarButtonItem = closeButtonItem
@@ -287,6 +291,7 @@ public class JSWebBrowserController: UIViewController, JSWebBrowserNavigation, L
                 let userAgent = result as? String,
                 let appendString = self.browserManager.appendingUserAgent {
                 webView.customUserAgent = userAgent + appendString
+                print("agent => ", userAgent, appendString)
             }
                 
                 // * Navigation Anim Library 등록
@@ -327,7 +332,11 @@ public class JSWebBrowserController: UIViewController, JSWebBrowserNavigation, L
         
         closeButton.rx.tap
             .subscribe(onNext: { [weak self] _ in
-                self?.dismissBrowser()
+                if let action = self?.closeButtonAction {
+                    action()
+                }else{
+                    self?.dismissBrowser()
+                }
             })
             .disposed(by: navigationDisposeBag)
     }
@@ -341,14 +350,20 @@ public class JSWebBrowserController: UIViewController, JSWebBrowserNavigation, L
         container.translatesAutoresizingMaskIntoConstraints = false
         if #available(iOS 11.0, *) {
             container.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
-            container.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+//            container.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+            let bottomAnchor = container.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            bottomAnchor.identifier = "B:|[view]|"
+            bottomAnchor.isActive = true
+                
             container.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
             container.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
             
         } else {
             // Fallback on earlier versions
             container.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
-            container.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+            let bottomAnchor = container.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            bottomAnchor.identifier = "B:|[view]|"
+            bottomAnchor.isActive = true
             container.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
             container.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
             
@@ -424,6 +439,7 @@ public class JSWebBrowserController: UIViewController, JSWebBrowserNavigation, L
         if transitionType == .push {
             if let navigation = fromVC.navigationController {
                 navigation.pushViewController(self, animated: animated)
+                completion?()
             }
         }else if transitionType == .root {
             if let window = UIApplication.shared.keyWindow {
@@ -436,10 +452,11 @@ public class JSWebBrowserController: UIViewController, JSWebBrowserNavigation, L
                 }else {
                     previousVC = fromVC
                 }
+                completion?()
             }
         }else if transitionType == .embed {
-            
-            fromVC.view.addSubview(self.view)
+            fromVC.view.insertSubview(self.view, at: 0)
+            completion?()
         }else{
             if #available(iOS 13.0, *) {
                 self.isModalInPresentation = transitionType == .fixedModal

@@ -13,16 +13,18 @@ public struct JSRequestPackage {
     public var loadURLString: String?
     public var method: String = "GET"
     public var parameter: String?
-    
+    public var allHTTPHeaderFields: [String:String]?
     
     public init() {
         
     }
-    public init(loadURLString: String? = nil, method: String = "GET", parameter: String? = nil) {
+    public init(loadURLString: String? = nil, method: String = "GET", parameter: String? = nil, allHTTPHeaderFields: [String:String]? = nil) {
         self.loadURLString = loadURLString
         self.method = method
         self.parameter = parameter
+        self.allHTTPHeaderFields = allHTTPHeaderFields
     }
+    
     
     
     public var loadURL: URL? {
@@ -35,14 +37,17 @@ public struct JSRequestPackage {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.httpBody = httpBody
+        request.allHTTPHeaderFields = allHTTPHeaderFields
         
         return request
     }
     
     public var httpBody: Data? {
-        guard let param = parameter?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {return nil}
+        guard let param = parameter else {return nil}
         
-        return param.data(using: .utf8)
+        return param.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)?
+            .replacingOccurrences(of: "+", with: "%2B")
+            .data(using: .utf8)
     }
     
     
