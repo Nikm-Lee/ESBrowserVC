@@ -1,0 +1,6 @@
+use_frameworks!
+target 'ESBrowserVC_Tests' do
+  pod 'ESBrowserVC', :path => '../'
+  
+  
+end
