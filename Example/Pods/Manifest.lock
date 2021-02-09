@@ -1,0 +1,16 @@
+PODS:
+  - ESBrowserVC (0.1.0)
+
+DEPENDENCIES:
+  - ESBrowserVC (from `../`)
+
+EXTERNAL SOURCES:
+  ESBrowserVC:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  ESBrowserVC: daf580e2ad68a895e32d29493d1f444451d0fc28
+
+PODFILE CHECKSUM: bae2f6d20780825ca82ea8d72eb1ffc31d5ec819
+
+COCOAPODS: 1.10.1
